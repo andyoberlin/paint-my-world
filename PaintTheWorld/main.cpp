@@ -15,23 +15,37 @@
 using namespace cv;
 
 int main(int argc, char** argv) {
-    IplImage* original = cvLoadImage( "Original.jpg", CV_LOAD_IMAGE_GRAYSCALE );
+    // Instantiate the Feature Detector
+    OrbFeatureDetector detector;
     
-    if( !original ) {
+    std::vector<KeyPoint> originalKeypoints;
+    Mat originalKeypointsImage;
+    
+    // load the image to display
+    Mat original = imread( "Original.jpg", CV_LOAD_IMAGE_GRAYSCALE );
+    
+    if( !original.data ) {
         std::cout <<  "Could not open or find the image" << std::endl;
         return -1;
     }
     
-    float ratio = 500*original->height/original->width;
+    // detect and draw the keypoints
+    detector.detect(original, originalKeypoints);
     
-    IplImage* originalResize = cvCreateImage(cvSize(500 , (int)ratio), original->depth, original->nChannels );
+    drawKeypoints(original, originalKeypoints, originalKeypointsImage, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
     
-    cvResize(original, originalResize);
+    // resize image to display in window
+    Size size = original.size();
+    float ratio = 1000*size.height/size.width;
+    
+    Mat originalResize;
+    
+    resize(originalKeypointsImage, originalResize, Size(1000, ratio));
     
     // Create a window in which the captured images will be presented
     cvNamedWindow( "OpenCVCamera", CV_WINDOW_AUTOSIZE );
     
-    cvShowImage("OpenCVCamera", originalResize );
+    imshow("OpenCVCamera", originalResize );
     
     waitKey(0);
     
