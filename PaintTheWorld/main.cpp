@@ -12,33 +12,30 @@
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/core/core.hpp>
 
+using namespace cv;
+
 int main(int argc, char** argv) {
-    CvCapture* capture = cvCaptureFromCAM( CV_CAP_ANY );
-    if ( !capture ) {
-        fprintf( stderr, "ERROR: capture is NULL \n" );
+    IplImage* original = cvLoadImage( "Original.jpg", CV_LOAD_IMAGE_GRAYSCALE );
+    
+    if( !original ) {
+        std::cout <<  "Could not open or find the image" << std::endl;
         return -1;
     }
+    
+    float ratio = 500*original->height/original->width;
+    
+    IplImage* originalResize = cvCreateImage(cvSize(500 , (int)ratio), original->depth, original->nChannels );
+    
+    cvResize(original, originalResize);
     
     // Create a window in which the captured images will be presented
     cvNamedWindow( "OpenCVCamera", CV_WINDOW_AUTOSIZE );
     
-    // Show the image captured from the camera in the window and repeat
-    while ( 1 ) {
-        // Get one frame
-        IplImage* frame = cvQueryFrame( capture );
-        if ( !frame ) {
-            fprintf( stderr, "ERROR: frame is null...\n" );
-            break;
-        }
-        cvShowImage( "OpenCVCamera", frame );
-        // Do not release the frame!
-        //If ESC key pressed, Key=0x10001B under OpenCV 0.9.7(linux version),
-        //remove higher bits using AND operator
-        if ( (cvWaitKey(10) & 255) == 27 ) break;
-    }
+    cvShowImage("OpenCVCamera", originalResize );
+    
+    waitKey(0);
     
     // Release the capture device housekeeping
-    cvReleaseCapture( &capture );
     cvDestroyWindow( "OpenCVCamera" );
     
     return 0;
